@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+/* ─── Design Token Overrides ──────────────────────────────────────────────── */
+@theme {
+  --color-primary:                  #9fff88;
+  --color-on-primary:               #026400;
+  --color-background:               #0d0f0d;
+  --color-surface:                  #0d0f0d;
+  --color-surface-dim:              #090b09;
+  --color-on-surface:               #faf9f5;
+  --color-on-surface-variant:       #ababa8;
+  --color-outline-variant:          #474846;
+  --color-secondary:                #8ff9a4;
+  --color-tertiary:                 #7af4ff;
+  --color-surface-container:        #181a18;
+  --color-surface-container-low:    #121412;
+  --color-surface-container-high:   #1e201e;
+  --color-surface-container-highest:#242624;
+  --color-surface-container-lowest: #000000;
+
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-body:     "Manrope", sans-serif;
+  --font-label:    "Space Grotesk", sans-serif;
+  --font-mono:     "Fira Code", "Courier New", monospace;
+}
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-on-surface overflow-x-hidden;
+    font-family: var(--font-body);
+  }
+
+  ::selection {
+    background-color: rgba(159, 255, 136, 0.25);
+  }
+}
+
+/* ─── Utilities ───────────────────────────────────────────────────────────── */
+@layer utilities {
+
+  /* Grainy film noise overlay — fixed so it doesn't scroll */
+  .grain-overlay {
+    background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+    opacity: 0.035;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  /* Radial nebula glow — parallax target */
+  .nebula-bg {
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(159, 255, 136, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 70%, rgba(122, 244, 255, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(159, 255, 136, 0.03) 0%, rgba(13, 15, 13, 1) 70%);
+    will-change: transform;
+  }
+
+  /* ─── Scroll Snap Container ──────────────────────────────────── */
+  .snap-container {
+    scroll-snap-type: y mandatory;
+    height: 100vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    position: relative;
+    z-index: 10;
+  }
+
+  .snap-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* 90vh hero so users glimpse Section 2 below the fold */
+  .snap-section-hero {
+    scroll-snap-align: start;
+    height: 95vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ─── Glass Panels ───────────────────────────────────────────── */
+  .glass-panel {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background-color: rgba(30, 32, 30, 0.72);
+    border: 1px solid rgba(71, 72, 70, 0.15);
+  }
+
+  .glass-panel-dark {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(9, 11, 9, 0.85);
+    border: 1px solid rgba(71, 72, 70, 0.1);
+  }
+
+  /* ─── Gradient Button ────────────────────────────────────────── */
+  .hush-gradient-btn {
+    background: linear-gradient(135deg, #9fff88 0%, #00fd00 100%);
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+  }
+
+  .hush-gradient-btn:hover {
+    box-shadow: 0 0 24px rgba(159, 255, 136, 0.45);
+  }
+
+  .hush-gradient-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* ─── Neon Glow Text ─────────────────────────────────────────── */
+  .glow-text-primary {
+    text-shadow: 0 0 12px rgba(159, 255, 136, 0.55),
+                 0 0 30px rgba(159, 255, 136, 0.2);
+  }
+
+  /* ─── Scroll Indicator ───────────────────────────────────────── */
+  @keyframes scroll-pulse {
+    0%  { transform: translateY(0);   opacity: 1; }
+    50% { transform: translateY(16px); opacity: 0.3; }
+    100%{ transform: translateY(0);   opacity: 1; }
+  }
+
+  .scroll-indicator-dot {
+    animation: scroll-pulse 2s ease-in-out infinite;
+  }
+
+  /* ─── HUD Corner Brackets ────────────────────────────────────── */
+  .hud-bracket {
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    border-color: rgba(159, 255, 136, 0.6);
+    transition: all 0.35s ease;
+  }
+
+  .hud-tl { top: -2px; left: -2px;  border-top-width: 2px;    border-left-width: 2px; }
+  .hud-tr { top: -2px; right: -2px; border-top-width: 2px;    border-right-width: 2px; }
+  .hud-bl { bottom: -2px; left: -2px;  border-bottom-width: 2px; border-left-width: 2px; }
+  .hud-br { bottom: -2px; right: -2px; border-bottom-width: 2px; border-right-width: 2px; }
+
+  /* CRT Scanline overlay */
+  .scanlines {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.18) 2px,
+      rgba(0, 0, 0, 0.18) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* ─── Scrollbar hidden globally ──────────────────────────────── */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* ─── Mint Overlay Backdrop ──────────────────────────────────── */
+  .mint-overlay-backdrop {
+    backdrop-filter: blur(16px) brightness(0.4);
+    -webkit-backdrop-filter: blur(16px) brightness(0.4);
+  }
+
+  /* ─── Progress Bar Shimmer ───────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  .progress-shimmer {
+    background: linear-gradient(
+      90deg,
+      #9fff88 0%,
+      #00fd00 40%,
+      #9fff88 60%,
+      #00fd00 100%
+    );
+    background-size: 200% auto;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* ─── Ping Animation ─────────────────────────────────────────── */
+  @keyframes altar-ping {
+    0%   { transform: scale(1);   opacity: 0.7; }
+    70%  { transform: scale(1.8); opacity: 0; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  .altar-ping {
+    animation: altar-ping 1.5s ease-out infinite;
+  }
+
+  /* ─── bg-primary/8 workaround (Tailwind v4 opacity shorthand) ── */
+  .bg-primary\/8 {
+    background-color: rgba(159, 255, 136, 0.08);
+  }
+
+  /* ─── Spectral Flicker — applied to altar card when all gems in ─ */
+  @keyframes spectral-flicker {
+    0%,  100% { opacity: 1; }
+    48%       { opacity: 1; }
+    49%       { opacity: 0.85; }
+    50%       { opacity: 1; }
+    96%       { opacity: 1; }
+    97%       { opacity: 0.9; }
+    98%       { opacity: 1; }
+  }
+
+  .spectral-flicker {
+    animation: spectral-flicker 4s ease-in-out infinite;
+  }
+
+  /* ─── Data Wave Animation (telemetry bars) ────────────────────── */
+  @keyframes data-wave {
+    0%,  100% { transform: scaleY(0.6); }
+    50%       { transform: scaleY(1.0); }
+  }
+
+  /* ─── Number Ticker Flash ─────────────────────────────────────── */
+  @keyframes number-flash {
+    0%   { color: #9fff88; text-shadow: 0 0 12px rgba(159,255,136,0.9); }
+    100% { color: inherit; text-shadow: none; }
+  }
+
+  .number-flash-once {
+    animation: number-flash 0.8s ease-out forwards;
+  }
+}
