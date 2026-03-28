@@ -36,7 +36,7 @@ export function useMint(addLog) {
       const signer    = await provider.getSigner();
       const contract  = new ethers.Contract(
         HUSH_CHAIN.contractAddress,
-        GenesisABI,
+        GenesisABI.abi,
         signer
       );
 

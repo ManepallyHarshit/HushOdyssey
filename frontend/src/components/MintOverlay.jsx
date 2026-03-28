@@ -82,7 +82,7 @@ export default function MintOverlay({ mintStatus, mintTxHash, onClose }) {
                   className="flex-1 py-2.5 hush-gradient-btn text-on-primary text-center font-bold rounded-sm"
                   style={{ fontFamily: "var(--font-label)", fontSize: "10px" }}
                 >
-                  VIEW_ON_HUSHSCAN →
+                  VIEW_ON_EXPLORER →
                 </a>
               )}
               {(mintStatus === "success" || mintStatus === "error") && (

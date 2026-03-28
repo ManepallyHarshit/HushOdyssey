@@ -160,7 +160,7 @@ export default function App() {
         style={{ y: bgY }}
       />
       <motion.div
-        className="fixed inset-0 grain-overlay z-[1] pointer-events-none"
+        className="fixed inset-0 grain-overlay z-1 pointer-events-none"
         style={{ y: grainY }}
       />
 

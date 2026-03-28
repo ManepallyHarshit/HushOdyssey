@@ -30,7 +30,7 @@ export function useWallet(addLog) {
       });
     } catch (err) {
       // 4902 = chain not added yet
-      if (err.code === 4902) {
+      if (err.code === 4902 || (err.message && err.message.includes("Unrecognized chain ID"))) {
         await window.ethereum.request({
           method: "wallet_addEthereumChain",
           params: [{

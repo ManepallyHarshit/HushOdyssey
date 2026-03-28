@@ -5,7 +5,7 @@ export const HUSH_CHAIN = {
   rpcUrl:          "https://rpc.hushnetworks.in",
   currencySymbol:  "HUSH",
   contractAddress: "0x1BbEB15714eB2f666D28C1762a97cB170B08B6d5",
-  blockExplorer:   "https://hushscan.in",
+  blockExplorer:   "https://explorer.hushnetworks.in/",
 };
 
 /** Game constants */

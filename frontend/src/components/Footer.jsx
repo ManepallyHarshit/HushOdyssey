@@ -9,6 +9,7 @@ import { HUSH_CHAIN } from "../constants";
 export default function Footer() {
   return (
     <footer
+      id="altar"
       className="snap-section flex flex-col justify-center items-center border-t border-outline-variant/10 px-8 md:px-16 relative overflow-hidden"
       style={{ background: "#000000" }}
     >
@@ -70,7 +71,7 @@ export default function Footer() {
 
           {/* Chain */}
           <FooterLinkGroup title="NETWORK">
-            <FooterLink href={HUSH_CHAIN.blockExplorer}>HUSHSCAN</FooterLink>
+            <FooterLink href={HUSH_CHAIN.blockExplorer}>EXPLORER</FooterLink>
             <FooterLink href={HUSH_CHAIN.rpcUrl}>RPC_NODE</FooterLink>
           </FooterLinkGroup>
         </div>

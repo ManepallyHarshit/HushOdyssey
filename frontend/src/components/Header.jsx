@@ -79,7 +79,7 @@ export default function Header({ walletAddress, isConnecting, onConnect, activeS
             className="hidden md:inline-flex tracking-tighter uppercase text-xs bg-primary text-on-primary px-4 py-2 rounded-sm font-bold hover:shadow-[0_0_16px_rgba(159,255,136,0.4)] transition-all duration-200 active:scale-95"
             style={{ fontFamily: "var(--font-label)" }}
           >
-            ENTER APP
+            EXPLORER
           </a>
         </div>
 
