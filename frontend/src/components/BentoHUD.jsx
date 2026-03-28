@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence, useSpring } from "motion/react";
-import { Fingerprint, Trophy, Church, Activity, Zap, Shield, Star, Radio } from "lucide-react";
-import { cn } from "../lib/utils";
+import { Activity, Church, Fingerprint, Radio, Shield, Star, Trophy, Zap } from "lucide-react";
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
 import { TOTAL_GEMS_PER_LEVEL, TOTAL_LEVELS } from "../constants";
+import { cn } from "../lib/utils";
 
 /** ─── BentoHUD ──────────────────────────────────────────────────────────────── */
 export default function BentoHUD({ playerStats, leaderboard, logs, walletAddress, isMinting, mintStatus, onMintClick }) {
@@ -25,6 +27,8 @@ export default function BentoHUD({ playerStats, leaderboard, logs, walletAddress
       className="snap-section relative flex items-center justify-center pt-20 pb-8 px-4 md:px-10 lg:px-14 overflow-hidden"
       style={{ background: "linear-gradient(180deg, #050705 0%, #0d0f0d 100%)" }}
     >
+      <ParticleBackground />
+
       {/* Section ambient glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div
@@ -54,16 +58,16 @@ export default function BentoHUD({ playerStats, leaderboard, logs, walletAddress
       </motion.div>
 
       <motion.div
-        className="grid grid-cols-12 gap-3 w-full max-w-7xl"
-        style={{ height: "76vh" }}
+        className="grid grid-cols-12 md:grid-rows-4 gap-3 w-full max-w-7xl"
+        style={{ height: "76vh", minHeight: "600px", perspective: "1500px" }}
         variants={container}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
       >
 
-        {/* ██████ CARD 1: PLAYER_BIO ██████████████████████████████████ */}
-        <motion.div variants={card} className="col-span-12 md:col-span-4 row-span-4 relative group">
+        {/* ██████ CARD 1: PLAYER_BIO (TOP LEFT) ██████████████████████████████████ */}
+        <motion.div variants={card} className="col-span-12 md:col-start-1 md:col-span-4 md:row-start-1 md:row-span-2 relative group flex flex-col">
           <HudCard glowColor="rgba(159,255,136,0.08)" shine>
             {/* Card Header */}
             <div className="flex items-center justify-between mb-5">
@@ -165,49 +169,31 @@ export default function BentoHUD({ playerStats, leaderboard, logs, walletAddress
           </HudCard>
         </motion.div>
 
-        {/* ██████ CARD 2: LEADERBOARD ██████████████████████████████████ */}
-        <motion.div variants={card} className="col-span-12 md:col-span-8 row-span-2">
-          <HudCard glowColor="rgba(159,255,136,0.05)">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-primary" />
-                <h3 className="text-primary tracking-[0.15em] uppercase font-bold" style={{ fontFamily: "var(--font-headline)", fontSize: "11px" }}>
-                  LEADERBOARD
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-on-surface-variant/40 uppercase" style={{ fontFamily: "var(--font-label)", fontSize: "8px" }}>TOP_AGENTS</span>
-                <div className="px-2 py-0.5 rounded-sm bg-primary/10 border border-primary/20">
-                  <span className="text-primary" style={{ fontFamily: "var(--font-label)", fontSize: "8px" }}>
-                    {leaderboard.length} REGISTERED
-                  </span>
-                </div>
-              </div>
-            </div>
+        {/* ██████ CARD 2: THE HUSH TOKEN (BOTTOM LEFT) ████████████████████████████ */}
+        <motion.div variants={card} className="col-span-12 md:col-start-1 md:col-span-4 md:row-start-3 md:row-span-2 flex flex-col">
+          <HudCard glowColor="rgba(159,255,136,0.1)" className="flex-1 flex flex-col p-5 overflow-hidden relative justify-between">
+            <h3 className="text-primary tracking-[0.2em] font-bold text-[15px] uppercase mb-4 flex items-center gap-2 relative z-10" style={{ fontFamily: "var(--font-headline)" }}>
+              <Star className="w-3.5 h-3.5" />
+              THE HUSH TOKEN
+            </h3>
 
-            {leaderboard.length > 0 ? (
-              <div className="space-y-1.5 overflow-y-auto scrollbar-hide" style={{ maxHeight: "calc(100% - 60px)" }}>
-                <AnimatePresence>
-                  {leaderboard.map((p, i) => (
-                    <LeaderboardRow
-                      key={p.walletAddress}
-                      rank={i + 1}
-                      player={p}
-                      isSelf={p.walletAddress === walletAddress?.toLowerCase()}
-                      index={i}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <EmptyState icon={<Activity className="w-5 h-5" />} label="SCANNING_FOR_AGENTS..." sublabel="Connect wallet and complete a level to appear here." />
-            )}
+            <TypewriterText 
+              text="HUSH is a privacy-focused utility token powering the Hush Network ecosystem, enabling anonymous transactions, content monetization, and decentralized governance. It is designed to provide secure, censorship-resistant interactions while rewarding users, creators, and validators within a fully decentralized, privacy-first platform."
+              className="text-on-surface-variant/80 text-[12.5px] leading-relaxed tracking-wider mb-auto relative z-10"
+              style={{ fontFamily: "var(--font-label)", minHeight: "120px" }}
+              delay={0.6}
+            />
+
+            {/* Background glowing watermark */}
+            <div className="absolute -bottom-6 -right-6 opacity-[0.05] pointer-events-none z-0">
+              <Shield className="w-40 h-40 text-primary" />
+            </div>
           </HudCard>
         </motion.div>
 
-        {/* ██████ CARD 3: ALTAR STATUS ██████████████████████████████████ */}
-        <motion.div variants={card} className="col-span-12 md:col-span-5 row-span-2 flex flex-col">
-          <HudCard glowColor="rgba(159,255,136,0.1)" className="flex-1 flex flex-col justify-between">
+        {/* ██████ CARD 3: THE ALTAR (TOP CENTER) ███████████████████████████ */}
+        <motion.div variants={card} className="col-span-12 md:col-start-5 md:col-span-5 md:row-start-1 md:row-span-2 flex flex-col">
+          <HudCard glowColor="rgba(159,255,136,0.1)" className="flex-1 flex flex-col justify-between p-5">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -285,8 +271,98 @@ export default function BentoHUD({ playerStats, leaderboard, logs, walletAddress
           </HudCard>
         </motion.div>
 
-        {/* ██████ CARD 4: LIVE TELEMETRY ████████████████████████████████ */}
-        <motion.div variants={card} className="col-span-12 md:col-span-7 row-span-2">
+        {/* ██████ CARD 4: LEADERBOARD (BOTTOM CENTER) ██████████████████████████████████ */}
+        <motion.div variants={card} className="col-span-12 md:col-start-5 md:col-span-5 md:row-start-3 md:row-span-2 flex flex-col">
+          <HudCard glowColor="rgba(159,255,136,0.05)">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-primary" />
+                <h3 className="text-primary tracking-[0.15em] uppercase font-bold" style={{ fontFamily: "var(--font-headline)", fontSize: "11px" }}>
+                  LEADERBOARD
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-on-surface-variant/40 uppercase" style={{ fontFamily: "var(--font-label)", fontSize: "8px" }}>TOP_AGENTS</span>
+                <div className="px-2 py-0.5 rounded-sm bg-primary/10 border border-primary/20">
+                  <span className="text-primary" style={{ fontFamily: "var(--font-label)", fontSize: "8px" }}>
+                    {leaderboard.length} REGISTERED
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {leaderboard.length > 0 ? (
+              <div className="space-y-1.5 overflow-y-auto scrollbar-hide" style={{ maxHeight: "calc(100% - 60px)" }}>
+                <AnimatePresence>
+                  {leaderboard.map((p, i) => (
+                    <LeaderboardRow
+                      key={p.walletAddress}
+                      rank={i + 1}
+                      player={p}
+                      isSelf={p.walletAddress === walletAddress?.toLowerCase()}
+                      index={i}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <EmptyState icon={<Activity className="w-5 h-5" />} label="SCANNING_FOR_AGENTS..." sublabel="Connect wallet and complete a level to appear here." />
+            )}
+          </HudCard>
+        </motion.div>
+
+        {/* ██████ CARD 5: PROOF OF ATTENDANCE (TOP RIGHT) ██████████████████████ */}
+        <motion.div variants={card} className="col-span-12 md:col-start-10 md:col-span-3 md:row-start-1 md:row-span-2 flex flex-col">
+          <HudCard glowColor="rgba(255,215,0,0.1)" className="flex-1 flex flex-col items-center justify-between relative overflow-hidden text-center p-5">
+            {/* Top Section */}
+            <div className="w-full relative z-10">
+              <h3 className="text-primary tracking-[0.15em] uppercase font-bold mt-1" style={{ fontFamily: "var(--font-headline)", fontSize: "11px" }}>
+                Proof of Achievement(POAP)
+              </h3>
+            </div>
+
+            {/* Absolute Centered Token */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] w-[110px] h-[110px] group/token z-0" style={{ perspective: "1000px" }}>
+              <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-2xl group-hover/token:bg-yellow-400/40 transition-colors duration-500" />
+              <motion.div
+                className="w-full h-full flex flex-col items-center justify-center relative z-10 mx-auto"
+                style={{ transformStyle: "preserve-3d" }}
+                animate={{ rotateY: 360 }}
+                transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+              >
+                {/* Custom Photo POAP Token */}
+                <div
+                  className="absolute inset-0 rounded-full overflow-hidden shadow-[0_0_25px_rgba(255,215,0,0.4)] border-2 border-yellow-300/60 flex items-center justify-center bg-zinc-900"
+                  style={{ transform: "translateZ(1px)" }}
+                >
+                  <img
+                    src="/custom-poap.png"
+                    alt="Custom POAP"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'block'; }}
+                  />
+                  <span className="hidden text-xs text-white/50 text-center px-2">Drop photo in /public folder</span>
+                </div>
+
+                {/* Glass overlay */}
+                <div
+                  className="absolute inset-0 rounded-full pointer-events-none mix-blend-overlay"
+                  style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%, transparent 100%)", transform: "translateZ(2px)" }}
+                />
+              </motion.div>
+            </div>
+
+            {/* Bottom Section */}
+            <div className="w-full z-10 relative mt-auto">
+              <p className="text-yellow-400 font-bold tracking-[0.2em] uppercase" style={{ fontFamily: "var(--font-label)", fontSize: "9px" }}>
+                GENESIS_POAP
+              </p>
+            </div>
+          </HudCard>
+        </motion.div>
+
+        {/* ██████ CARD 6: LIVE TELEMETRY (BOTTOM RIGHT) ████████████████████████████████ */}
+        <motion.div variants={card} className="col-span-12 md:col-start-10 md:col-span-3 md:row-start-3 md:row-span-2 flex flex-col">
           <HudCard glowColor="rgba(122,244,255,0.04)" className="h-full flex flex-col" override style={{ background: "rgba(5,6,5,0.9)", border: "1px solid rgba(71,72,70,0.12)" }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -296,13 +372,12 @@ export default function BentoHUD({ playerStats, leaderboard, logs, walletAddress
                 </h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-primary/30 uppercase" style={{ fontFamily: "var(--font-label)", fontSize: "8px" }}>UPTIME: OPERATIONAL</span>
                 <div className="flex gap-0.5">
-                  {[0,1,2,3].map(i => (
+                  {[0,1,2].map(i => (
                     <div
                       key={i}
                       className="w-0.5 bg-primary rounded-full animate-pulse"
-                      style={{ height: `${[6, 10, 8, 12][i]}px`, animationDelay: `${i * 100}ms`, opacity: 0.7 }}
+                      style={{ height: `${[6, 10, 8][i]}px`, animationDelay: `${i * 100}ms`, opacity: 0.7 }}
                     />
                   ))}
                 </div>
@@ -372,31 +447,79 @@ export default function BentoHUD({ playerStats, leaderboard, logs, walletAddress
 /*  Sub-components                                                              */
 /* ──────────────────────────────────────────────────────────────────────────── */
 
-/** Generic glass card wrapper */
+/** Generic glass card wrapper with 3D Parallax Tilt */
 function HudCard({ children, glowColor, className, shine, override, style: overrideStyle }) {
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  // Smooth out the animation for premium feel
+  const mouseXSpring = useSpring(x, { stiffness: 150, damping: 20 });
+  const mouseYSpring = useSpring(y, { stiffness: 150, damping: 20 });
+
+  // Map mouse coordinates to rotation (-6 to 6 degrees)
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["6deg", "-6deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-6deg", "6deg"]);
+
+  const handleMouseMove = (e) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // Convert to percentage from center (-0.5 to 0.5)
+    x.set((mouseX / width) - 0.5);
+    y.set((mouseY / height) - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   return (
-    <div
-      className={cn("relative h-full p-5 rounded-md overflow-hidden transition-all duration-500 group/card", className)}
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={cn("relative h-full p-5 rounded-md overflow-hidden group/card shadow-2xl", className)}
       style={{
-        background:   override ? undefined : "rgba(18,20,18,0.82)",
+        background:   override ? undefined : "rgba(18,20,18,0.85)",
         border:       "1px solid rgba(71,72,70,0.18)",
         backdropFilter: "blur(16px)",
-        boxShadow:    `0 0 0 1px rgba(71,72,70,0.05), inset 0 1px 0 rgba(255,255,255,0.03)`,
+        boxShadow:    `0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)`,
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
         ...overrideStyle,
       }}
     >
-      {/* Ambient glow */}
+      {/* Ambient hover glow */}
       <div
-        className="absolute inset-0 rounded-md pointer-events-none opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"
+        className="absolute inset-0 pointer-events-none opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"
         style={{ background: `radial-gradient(ellipse at 50% 0%, ${glowColor} 0%, transparent 60%)` }}
+      />
+      {/* Interactive gloss shine layer that moves opposite to tilt */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 group-hover/card:opacity-20 transition-opacity duration-500"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, transparent 35%, transparent 100%)",
+          x: useTransform(mouseXSpring, [-0.5, 0.5], ["-10%", "10%"]),
+          y: useTransform(mouseYSpring, [-0.5, 0.5], ["-10%", "10%"])
+        }}
       />
       {/* Subtle top border gradient */}
       <div
         className="absolute top-0 left-0 right-0 h-px pointer-events-none opacity-40"
         style={{ background: "linear-gradient(90deg, transparent, rgba(159,255,136,0.3), transparent)" }}
       />
-      {children}
-    </div>
+      {/* Content wrapper */}
+      <div className="relative z-10 w-full h-full flex flex-col">
+        {children}
+      </div>
+    </motion.div>
   );
 }
 
@@ -521,5 +644,67 @@ function EmptyState({ icon, label, sublabel }) {
       <p style={{ fontFamily: "var(--font-label)", fontSize: "9px" }} className="text-on-surface-variant tracking-widest uppercase">{label}</p>
       {sublabel && <p style={{ fontFamily: "var(--font-label)", fontSize: "8px" }} className="text-on-surface-variant/50 text-center">{sublabel}</p>}
     </div>
+  );
+}
+
+/** Tsparticles WebGL Interactive Background */
+function ParticleBackground() {
+  const particlesInit = useCallback(async (engine) => {
+    await loadFull(engine);
+  }, []);
+
+  return (
+    <Particles
+      id="tsparticles"
+      init={particlesInit}
+      options={{
+        background: { color: { value: "transparent" } },
+        fpsLimit: 60,
+        interactivity: {
+          events: {
+            onHover: { enable: true, mode: "repulse" },
+            resize: true,
+          },
+          modes: { repulse: { distance: 120, duration: 0.6 } },
+        },
+        particles: {
+          color: { value: "#9fff88" },
+          links: { color: "#9fff88", distance: 150, enable: true, opacity: 0.1, width: 1 },
+          move: { enable: true, speed: 0.8, direction: "none", random: true, straight: false, outModes: { default: "bounce" } },
+          number: { density: { enable: true, area: 800 }, value: 40 },
+          opacity: { value: 0.2 },
+          shape: { type: "circle" },
+          size: { value: { min: 1, max: 2 } },
+        },
+        detectRetina: true,
+      }}
+      className="absolute inset-0 z-0 pointer-events-auto mix-blend-screen"
+    />
+  );
+}
+
+/** Framer Motion Typewriter Effect */
+function TypewriterText({ text, className, style, delay = 0 }) {
+  if (!text) return null;
+  const chars = text.split("");
+  return (
+    <motion.div
+      className={className}
+      style={{ ...style, lineHeight: "1.6" }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.5 }}
+    >
+      {chars.map((char, index) => (
+        <motion.span
+          key={index}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.01, delay: delay + index * 0.01 }}
+        >
+          {char}
+        </motion.span>
+      ))}
+    </motion.div>
   );
 }

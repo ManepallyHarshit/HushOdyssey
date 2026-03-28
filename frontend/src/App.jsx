@@ -11,6 +11,9 @@ import ScrollIndicator from "./components/ScrollIndicator";
 import BentoHUD        from "./components/BentoHUD";
 import MintOverlay     from "./components/MintOverlay";
 import Footer          from "./components/Footer";
+import ObjectivePopup  from "./components/ObjectivePopup";
+import GemToast        from "./components/GemToast";
+import InactivityPopup from "./components/InactivityPopup";
 
 import { TOTAL_GEMS_PER_LEVEL } from "./constants";
 
@@ -37,6 +40,47 @@ export default function App() {
   const prevGemsRef = useRef(0);
 
   const [leaderboard, setLeaderboard] = useState([]);
+
+  // ── Inactivity tracking ───────────────────────────────────────────────────────
+  const [showInactivity, setShowInactivity] = useState(false);
+  const inactiveTimeoutRef = useRef(null);
+
+  const resetActivityTimer = useCallback(() => {
+    if (showInactivity) return; // wait for explicit resume
+    if (inactiveTimeoutRef.current) clearTimeout(inactiveTimeoutRef.current);
+    inactiveTimeoutRef.current = setTimeout(() => {
+      setShowInactivity(true);
+    }, 60000); // 1 minute
+  }, [showInactivity]);
+
+  const resumeActivity = () => {
+    setShowInactivity(false);
+    resetActivityTimer();
+  };
+
+  useEffect(() => {
+    resetActivityTimer();
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    const handleActivity = () => resetActivityTimer();
+    
+    events.forEach(evt => window.addEventListener(evt, handleActivity));
+    return () => {
+      if (inactiveTimeoutRef.current) clearTimeout(inactiveTimeoutRef.current);
+      events.forEach(evt => window.removeEventListener(evt, handleActivity));
+    };
+  }, [resetActivityTimer]);
+
+  // ── Toasts (Interactive Notifications) ───────────────────────────────────────
+  const [toasts, setToasts] = useState([]);
+
+  const addGemToast = useCallback((currentCount, delta) => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, currentCount, delta }]);
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   // ── Scroll tracking ──────────────────────────────────────────────────────────
   const scrollRef        = useRef(null);
@@ -115,12 +159,16 @@ export default function App() {
     if (delta <= 0) return;                            // Ignore stale/duplicate events
     prevGemsRef.current = clampedGems;
     addLog(`GEM_COLLECTED: ${clampedGems}/${TOTAL_GEMS_PER_LEVEL} [+${delta * 10}pts]`);
+    
+    // Trigger interactive toast UI
+    addGemToast(clampedGems, delta);
+
     setPlayerStats((prev) => ({
       ...prev,
       gemsCollected: clampedGems,
       score: prev.score + delta * 10,
     }));
-  }, [addLog]);
+  }, [addLog, addGemToast]);
 
   const onMintTrigger = useCallback((payload) => {
     // ── STRICT VALIDATION: Block premature rituals from Unity ──
@@ -178,6 +226,15 @@ export default function App() {
         mintTxHash={mintTxHash}
         onClose={resetMint}
       />
+
+      {/* ── Objective Popup Modal ─────────────────────────────────── */}
+      <ObjectivePopup />
+
+      {/* ── Inactivity Popup ──────────────────────────────────────── */}
+      <InactivityPopup show={showInactivity} onResume={resumeActivity} />
+
+      {/* ── Dynamic Toasts ────────────────────────────────────────── */}
+      <GemToast toasts={toasts} removeToast={removeToast} />
 
       {/* ── Snap Scroll Container ─────────────────────────────────── */}
       <div ref={scrollRef} className="snap-container relative z-10">

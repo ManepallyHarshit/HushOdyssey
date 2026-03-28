@@ -10,4 +10,4 @@ export const HUSH_CHAIN = {
 
 /** Game constants */
 export const TOTAL_GEMS_PER_LEVEL = 5;
-export const TOTAL_LEVELS         = 3;
+export const TOTAL_LEVELS         = 1;

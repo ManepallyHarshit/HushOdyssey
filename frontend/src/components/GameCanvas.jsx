@@ -146,6 +146,17 @@ export default function GameCanvas({
       >
         [DEV] SIMULATE_MINT_TRIGGER
       </button>
+
+      {/* Play Again Button */}
+      {isLoaded && (
+        <button
+          onClick={() => window.location.reload()}
+          className="absolute bottom-3 left-3 z-20 hush-gradient-btn hover:scale-105 transition-transform text-background px-5 py-2.5 rounded-sm font-bold tracking-[0.2em] uppercase shadow-[0_0_20px_rgba(159,255,136,0.6)] border border-primary/50"
+          style={{ fontSize: "11px", fontFamily: "var(--font-label)" }}
+        >
+          [ PLAY AGAIN ]
+        </button>
+      )}
     </div>
   );
 }
