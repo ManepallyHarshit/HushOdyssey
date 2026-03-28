@@ -1,6 +1,7 @@
 import React from "react";
 import { Terminal, Github, Twitter, Disc as Discord } from "lucide-react";
 import { HUSH_CHAIN } from "../constants";
+import BackgroundMusic from "./BackgroundMusic";
 
 /**
  * Header — Fixed top navigation with glassmorphism, wallet state, and section links.
@@ -53,6 +54,8 @@ export default function Header({ walletAddress, isConnecting, onConnect, activeS
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          <BackgroundMusic />
+
           <button
             onClick={onConnect}
             disabled={isConnecting}
