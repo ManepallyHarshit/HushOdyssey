@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/(.*)", "destination": "/frontend/dist/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/unity/Build/(.*\\.unityweb)",
+      "headers": [
+        { "key": "Content-Encoding", "value": "gzip" }
+      ]
+    },
+    {
+      "source": "/unity/Build/(.*\\.wasm\\.unityweb)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/wasm" }
+      ]
+    },
+    {
+      "source": "/unity/Build/(.*\\.br)",
+      "headers": [
+        { "key": "Content-Encoding", "value": "br" }
+      ]
+    },
+    {
+      "source": "/unity/Build/(.*\\.wasm\\.br)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/wasm" },
+        { "key": "Content-Encoding", "value": "br" }
+      ]
+    }
+  ]
+}

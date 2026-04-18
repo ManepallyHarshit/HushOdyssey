@@ -41,6 +41,24 @@ export default function App() {
 
   const [leaderboard, setLeaderboard] = useState([]);
 
+  // Fetch leaderboard on mount
+  useEffect(() => {
+    const fetchBoard = async () => {
+      try {
+        const res = await fetch("/api/leaderboard");
+        if (res.ok) {
+          const data = await res.json();
+          setLeaderboard(data);
+        }
+      } catch (err) {
+        console.warn("Leaderboard fetch failed (fallback to local state)");
+      }
+    };
+    fetchBoard();
+    const interval = setInterval(fetchBoard, 10000); // Poll every 10s
+    return () => clearInterval(interval);
+  }, []);
+
   // ── Inactivity tracking ───────────────────────────────────────────────────────
   const [showInactivity, setShowInactivity] = useState(false);
   const inactiveTimeoutRef = useRef(null);
@@ -131,6 +149,22 @@ export default function App() {
     const levelForBoard =
       levelsForBoard ?? playerStats.levelsCompleted;
 
+    // Sync score to backend
+    try {
+      await fetch("/api/player/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletAddress: address,
+          score: playerStats.score,
+          gemsCollected: playerStats.gemsCollected,
+          levelsCompleted: levelForBoard
+        })
+      });
+    } catch (err) {
+      console.warn("Score sync to backend failed");
+    }
+
     setLeaderboard((prev) => {
       const exists = prev.find((p) => p.walletAddress === addrLower);
       if (exists) {
@@ -150,7 +184,7 @@ export default function App() {
         },
       ].sort((a, b) => b.score - a.score);
     });
-  }, [walletAddress, connectWallet, mintPoap, playerStats.score, playerStats.levelsCompleted]);
+  }, [walletAddress, connectWallet, mintPoap, playerStats.score, playerStats.gemsCollected, playerStats.levelsCompleted]);
 
   // ── Unity Bridge (game events) ──────────────────────────────────────────────
   const onGemSync = useCallback((gems) => {

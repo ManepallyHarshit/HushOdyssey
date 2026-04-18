@@ -1,0 +1,10 @@
+{
+  "name": "hush-odyssey-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "vite": "^6.2.0"
+  }
+}
