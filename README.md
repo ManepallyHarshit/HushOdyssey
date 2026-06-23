@@ -60,4 +60,4 @@ node server.js     # (optional — frontend degrades gracefully without it)
 2. Collect gems (each pickup updates React's Bento HUD via `SyncScore`)
 3. Deposit all gems at the Genesis Altar
 4. MetaMask prompts to sign the POAP mint on Hush Chain
-5. POAP is archived forever on the blockchain
+5. A specialised POAP is archived forever on the blockchain 
